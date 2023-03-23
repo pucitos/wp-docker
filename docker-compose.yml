@@ -4,12 +4,12 @@ networks:
   wordpress:
 
 services:
-  wpdk-site:
+  site:
     build:
       context: .
       dockerfile: nginx.dockerfile
     image: px-nginx-wp
-    container_name: wpdk-nginx
+    container_name: nginx
     environment:
       APP_DOMAIN: "${APP_DOMAIN:-wordpress.localhost}"
     ports:
@@ -17,16 +17,16 @@ services:
       - 443:443
     volumes:
       - ./wordpress:/var/www/html:delegated
-      - wpdk-wp-uploads:/var/www/html/wp-content/uploads
+      - wp-uploads:/var/www/html/wp-content/uploads
     depends_on:   
-      - wpdk-php
-      - wpdk-mysql
+      - php
+      - mysql
     networks:
       - wordpress
 
-  wpdk-mysql:
+  mysql:
     image: mysql:5.7.29
-    container_name: wpdk-mysql
+    container_name: mysql
     restart: always
     ports:
       - 3306:3306
@@ -36,35 +36,35 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
       SERVICE_TAGS: dev
-      SERVICE_NAME: wpdk-mysql
+      SERVICE_NAME: mysql
     volumes:
-      - wpdk-mysql-data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     networks:
       - wordpress
 
-  wpdk-php:
+  php:
     build:
       context: .
       dockerfile: php.dockerfile
     image: px-php-wp
-    container_name: wpdk-php
+    container_name: php
     volumes:
       - ./wordpress:/var/www/html:delegated
-      - wpdk-wp-uploads:/var/www/html/wp-content/uploads
+      - wp-uploads:/var/www/html/wp-content/uploads
     networks:
       - wordpress
 
-  wpdk-wp:
+  wp:
     build:
       context: .
       dockerfile: php.dockerfile
     image: px-wp
-    container_name: wpdk-wp
+    container_name: wp
     entrypoint: ['wp', '--allow-root']
     volumes:
       - ./wordpress:/var/www/html:delegated
     networks:
       - wordpress
 volumes:
-  wpdk-mysql-data:
-  wpdk-wp-uploads:
+  mysql-data:
+  wp-uploads:
